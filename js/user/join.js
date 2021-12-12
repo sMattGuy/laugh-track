@@ -67,16 +67,15 @@ async function playAudio(connection){
 			// 900000 is 15 mins
 			// 60000 is 1 min
 			let randomTime = Math.floor(Math.random() * 900000) + 900000;
-			let currentTime = Date.now();
-			currentTime += randomTime;
+
 			console.log(`done playing, sleeping for ${randomTime} then playing laugh${randomSample}.webm`);
-			while(currentTime > Date.now()){
-				//do nothing
-			}
-			resource = createAudioResource(createReadStream(`./sounds/laugh${randomSample}.webm`, {
-				inputType: StreamType.OggOpus,
-			}));
-			player.play(resource);
+			
+			setTimeout(function(){
+					resource = createAudioResource(createReadStream(`./sounds/laugh${randomSample}.webm`, {
+					inputType: StreamType.OggOpus,
+				}));
+				player.play(resource);
+			},randomTime);
 		});
 	}
 	catch(error){
