@@ -45,41 +45,41 @@ async function connectToChannel(channel){
 }
 
 async function playAudio(connection){
+	const filecount = fs.readdirSync('./sounds').length
+	console.log(`filecount: ${filecount}`);
+	//wait and play next thing
+	let randomSample = Math.floor(Math.random() * filecount);
+	// 900000 is 15 mins
+	// 60000 is 1 min
+	let randomTime = Math.floor(Math.random() * 900000) + 900000;
+	
 	const player = createAudioPlayer({
 		behaviors: {
 			noSubscriber: NoSubscriberBehavior.Pause,
 		},
 	});
-	let resource = createAudioResource(createReadStream(`./sounds/laugh0.webm`, {
-		inputType: StreamType.OggOpus,
+	let resource = createAudioResource(createReadStream(`./sounds/laugh${randomSample}.webm`, {
+		inputType: StreamType.WebmOpus,
 	}));
 	player.play(resource);
 	
 	try{
 		await entersState(player, AudioPlayerStatus.Playing, 5e3);
 		connection.subscribe(player);
-		
-		const filecount = fs.readdirSync('./sounds').length
-		console.log(`filecount: ${filecount}`);
-		player.on(AudioPlayerStatus.Idle, () => {
-			//wait and play next thing
-			let randomSample = Math.floor(Math.random() * filecount);
-			// 900000 is 15 mins
-			// 60000 is 1 min
-			let randomTime = Math.floor(Math.random() * 900000) + 900000;
-
-			console.log(`done playing, sleeping for ${randomTime} then playing laugh${randomSample}.webm`);
-			
-			setTimeout(function(){
-					resource = createAudioResource(createReadStream(`./sounds/laugh${randomSample}.webm`, {
-					inputType: StreamType.OggOpus,
-				}));
-				player.play(resource);
-			},randomTime);
-		});
 	}
 	catch(error){
 		console.log(error);
 		throw error;
-	}	
+	}
+	
+	player.on(AudioPlayerStatus.Idle, () => {
+		console.log(`done playing, sleeping for ${randomTime} then playing laugh${randomSample}.webm`);
+		
+		setTimeout(function(){
+			playAudio(connection)
+		}, randomTime);
+	});
+	player.on('error', error => {
+		console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+	});
 }
