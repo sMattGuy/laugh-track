@@ -13,8 +13,11 @@ module.exports = {
 			try{
 				const conn = getVoiceConnection(interaction.guild.id);
 				if(conn){
-					interaction.editReply({content:`I'm already here!`,ephemeral:true});
-					return;
+					if(conn.joinConfig.channelId == channel.id){
+						interaction.editReply({content:`I'm already here!`,ephemeral:true});
+						return;
+					}
+					conn.destroy();
 				}
 				const connection = await connectToChannel(channel);
 				console.log('ok!');
