@@ -11,13 +11,18 @@ module.exports = {
 		const channel = interaction.member?.voice.channel;
 		if(channel){
 			try{
+				const conn = getVoiceConnection(interaction.guild.id);
+				if(conn){
+					interaction.editReply({content:`I'm already here!`,ephemeral:true});
+					return;
+				}
 				const connection = await connectToChannel(channel);
 				console.log('ok!');
 				playAudio(connection);
 				interaction.editReply({content:'Hello!',ephemeral:true});
 			}
 			catch(error){
-				interaction.editReply({content:'Something went wrong...',ephemeral:true})
+				interaction.editReply({content:'Something went wrong...',ephemeral:true});
 			}
 		}
 		else{
